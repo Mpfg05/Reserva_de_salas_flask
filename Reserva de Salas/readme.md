@@ -1,14 +1,7 @@
-# 🏫 API de Reserva de Salas
+## 🏫 API de Reserva de Salas
 
-Este repositório contém a API de **Reserva de Salas**, desenvolvida com **Flask** e **SQLAlchemy**, como parte de uma arquitetura de microsserviços para gerenciamento acadêmico.
-
----
-
-## 🧩 Arquitetura
-
-Este serviço é um **microsserviço** responsável exclusivamente pela **gestão de reservas de salas** por turma. Ele faz parte de um sistema maior (ex: *School System*), e depende de outro serviço para validar as turmas existentes.
-
-> ⚠️ A API de **Gerenciamento Escolar** deve estar ativa e acessível. A comunicação entre os serviços ocorre via HTTP REST.
+## 📝 Descrição da API
+Microsserviço responsável pela gestão de reservas de salas acadêmicas, integrado ao sistema escolar. Oferece endpoints para criar, listar e remover reservas, com validação externa de turmas.
 
 Validações feitas via requisição externa:
 
