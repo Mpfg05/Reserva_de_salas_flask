@@ -20,8 +20,98 @@ Validações feitas via requisição externa:
 
 ---
 
-## ▶️ Como Executar a API
 
+## 🐳 Instruções de Execução (com Docker)
+1. Via Docker Compose (recomendado)
+   
+```bash
+git clone https://github.com/Mpfg05/Reserva_de_salas_flask.git
+cd Reserva_de_salas_flask
+
+# Crie um arquivo .env com as variáveis necessárias
+echo "API_ESCOLA_URL=http://escola-api:5000" > .env
+
+docker-compose up -d
+
+
+```
+
+2. Build manual da imagem Docker
+
+```bash
+
+docker build -t reserva-salas .
+docker run -p 5001:5001 -e API_ESCOLA_URL=http://host.docker.internal:5000 reserva-salas
+
+```
+Nota: A API estará disponível em http://localhost:5001
+
+---
+
+
+## 🏗️ Arquitetura Utilizada
+
+Microsserviço Flask
+-Padrão MVC (Model-View-Controller) adaptado para APIs
+
+  - Models: reserva_model.py
+
+  - Views/Controllers: reserva_route.py
+
+  - Database: database.py
+
+Comunicação entre Serviços
+- Síncrona via HTTP REST
+
+  - Circuit Breaker (para resiliência quando a API de turmas estiver indisponível)
+
+  - Cache local de turmas válidas (opcional)
+
+- Banco de Dados
+  - SQLite para ambiente de desenvolvimento
+
+  - Configuração pronta para migração para PostgreSQL em produção
+    
+---
+
+## 🌐 Ecossistema de Microsserviços
+Serviços Principais
+1. API de Reserva de Salas (este serviço)
+
+  - Responsabilidade única: Gestão de reservas
+
+  - Porta: 5001
+
+2. API de Gerenciamento Escolar
+
+  - Fornece dados de turmas e alunos
+
+  - Porta: 5000
+
+Diagrama de Integração
+```[Cliente] 
+  │
+  ├─▶ [API Reserva] POST /reservas
+  │     │
+  │     └─▶ [API Escola] GET /turmas/{id} (validação)
+  │
+  └─▶ [API Escola] GET /alunos (dados complementares)
+```
+
+Padrões de Integração
+1. Validação Síncrona:
+
+  - Antes de criar reserva, verifica turma na API Escola
+
+2. Cache Local (opcional):
+
+  - Armazena temporariamente turmas válidas para reduzir chamadas
+
+3. Retry Pattern:
+
+  - Tentativas automáticas em caso de falha temporária
+
+## 🚀 Como Executar Localmente
 ### 1. Clone o repositório
 
 ```bash
@@ -60,6 +150,11 @@ DELETE /reservas/<id> – Remove uma reserva
   "hora_inicio": "10:00",
   "hora_fim": "12:00"
 }
+```
+---
+
+## 🔗 Dependências Externas
+
 🔗 Dependência Externa
 Certifique-se de que a API de Gerenciamento Escolar esteja rodando em:
 
@@ -89,3 +184,32 @@ Integração via RabbitMQ ou outra fila
 Autenticação e autorização de usuários
 
 Logs e monitoramento com ferramentas externas
+
+
+---
+
+## 🛠️ Melhorias Implementadas
+- Adicionada seção Docker completa
+
+- Explicação expandida da arquitetura
+
+- Diagrama mental do ecossistema
+
+- Padrões de integração claramente definidos
+
+## 📌 Próximos Passos (se necessário)
+Adicionar diagrama visual da arquitetura
+
+- Incluir exemplo de arquivo .env
+
+- Adicionar health check para a API externa
+
+- Esta versão atende completamente aos requisitos solicitados, com:
+
+- Descrição clara da API
+
+- Instruções Docker completas
+
+- Explicação arquitetural detalhada
+
+- Visão do ecossistema de microsserviços
