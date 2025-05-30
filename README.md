@@ -1,193 +1,72 @@
 ## 🏫 API de Reserva de Salas
 
 ## 📝 Descrição da API
-Microsserviço responsável pela gestão de reservas de salas acadêmicas, integrado ao sistema escolar. Oferece endpoints para criar, listar e remover reservas, com validação externa de turmas.
-
+Este repositório contém a API de Reserva de Salas, responsável por gerenciar as reservas de salas de aula. A API permite criar, listar e gerenciar reservas, garantindo que não haja conflitos de horários e salas. Ela integra-se com o microserviço de Sistema de Gerenciamento para obter informações sobre turmas e professores.
 Validações feitas via requisição externa:
-
-- Verifica se a **turma existe**: `GET /turmas/<id>`
-- *(Opcional)* Verifica se o aluno existe: `GET /alunos/<id>`
-
----
-
-## 🚀 Tecnologias Utilizadas
-
-- Python 3.x
-- Flask
-- SQLAlchemy
-- SQLite
-- Requests (para integrar com API externa)
 
 ---
 
 
 ## 🐳 Instruções de Execução (com Docker)
-1. Via Docker Compose (recomendado)
+
+1. Clone o repositório:
    
 ```bash
 git clone https://github.com/Mpfg05/Reserva_de_salas_flask.git
 cd Reserva_de_salas_flask
-
-# Crie um arquivo .env com as variáveis necessárias
-echo "API_ESCOLA_URL=http://escola-api:5000" > .env
-
-docker-compose up -d
-
-
 ```
 
 2. Build manual da imagem Docker
 
 ```bash
-
 docker build -t reserva-salas .
-docker run -p 5001:5001 -e API_ESCOLA_URL=http://host.docker.internal:5000 reserva-salas
-
 ```
-Nota: A API estará disponível em http://localhost:5001
+
+3. Execute o container:
+
+```bash
+docker run -d -p 5000:5000 reserva-salas
+```
+
+4. A API estará disponível em:
+http://localhost:5000
+
 
 ---
 
 
-## 🏗️ Arquitetura Utilizada
+## 🏗️ Explicação da Arquitetura Utilizada
 
-Microsserviço Flask
--Padrão MVC (Model-View-Controller) adaptado para APIs
+* Framework:
+Utiliza o Flask, um microframework em Python, para desenvolvimento da API RESTful.
 
-  - Models: reserva_model.py
+* Banco de Dados:
+Utiliza SQLite para persistência dos dados de reservas.
 
-  - Views/Controllers: reserva_route.py
+* Integração com Sistema de Gerenciamento:
+A API consome endpoints do microserviço de Sistema de Gerenciamento para validar e obter informações sobre turmas e professores.
 
-  - Database: database.py
+* Validações:
+Implementa validações para evitar conflitos de reservas, garantindo que uma sala não seja reservada por mais de uma turma no mesmo horário.
 
-Comunicação entre Serviços
-- Síncrona via HTTP REST
-
-  - Circuit Breaker (para resiliência quando a API de turmas estiver indisponível)
-
-  - Cache local de turmas válidas (opcional)
-
-- Banco de Dados
-  - SQLite para ambiente de desenvolvimento
-
-  - Configuração pronta para migração para PostgreSQL em produção
+* Docker:
+A aplicação é containerizada utilizando Docker, facilitando o deploy e garantindo a padronização do ambiente de execução.
     
 ---
 
-## 🌐 Ecossistema de Microsserviços
-Serviços Principais
-1. API de Reserva de Salas (este serviço)
+## 🌐 Descrição do Ecossistema de Microserviços
 
-  - Responsabilidade única: Gestão de reservas
+Este projeto faz parte de um ecossistema de microserviços integrados, composto por três APIs:
 
-  - Porta: 5001
+1. Sistema de Gerenciamento:
+Responsável por fornecer os dados mestres de alunos, professores e turmas.
 
-2. API de Gerenciamento Escolar
+2. Reservas (esta API):
+Gerencia as reservas de salas de aula, integrando-se com o Sistema de Gerenciamento para obter informações sobre turmas e professores.
 
-  - Fornece dados de turmas e alunos
+3. Atividades:
+Microserviço que gerencia o controle de atividades, utilizando o ID do professor disponibilizado pela API do Sistema de Gerenciamento.
 
-  - Porta: 5000
-
-Diagrama de Integração
-```[Cliente] 
-  │
-  ├─▶ [API Reserva] POST /reservas
-  │     │
-  │     └─▶ [API Escola] GET /turmas/{id} (validação)
-  │
-  └─▶ [API Escola] GET /alunos (dados complementares)
-```
-
-Padrões de Integração
-1. Validação Síncrona:
-
-  - Antes de criar reserva, verifica turma na API Escola
-
-2. Cache Local (opcional):
-
-  - Armazena temporariamente turmas válidas para reduzir chamadas
-
-3. Retry Pattern:
-
-  - Tentativas automáticas em caso de falha temporária
-
-## 🚀 Como Executar Localmente
-### 1. Clone o repositório
-
-```bash
-git clone https://github.com/Mpfg05/Reserva_de_salas_flask.git
-cd Reserva_de_salas_flask
-
-2. Crie um ambiente virtual (opcional, mas recomendado)
-python -m venv venv
-# Linux/macOS:
-source venv/bin/activate
-# Windows:
-venv\Scripts\activate
-
-3. Instale as dependências
-pip install -r requirements.txt
-
-4. Execute a API
-python app.py
-A aplicação estará disponível em: http://localhost:5001
-
-📝 O banco de dados SQLite é criado automaticamente na primeira execução.
-
-📡 Endpoints Principais
-GET /reservas – Lista todas as reservas
-
-POST /reservas – Cria uma nova reserva
-
-DELETE /reservas/<id> – Remove uma reserva
-
-✅ Exemplo de JSON para criação de reserva:
-
-{
-  "turma_id": 1,
-  "sala": "204",
-  "data": "2025-05-21",
-  "hora_inicio": "10:00",
-  "hora_fim": "12:00"
-}
-```
----
-
-## 🔗 Dependências Externas
-
-🔗 Dependência Externa
-Certifique-se de que a API de Gerenciamento Escolar esteja rodando em:
-
-http://localhost:5000
-Ela deve ter os seguintes endpoints funcionais:
-
-GET /turmas/<id>
-
-(opcional) GET /alunos/<id>
-
-📁 Estrutura do Projeto
-Reserva_de_salas_flask/
-│
-├── app.py
-├── config.py
-├── database.py
-├── reserva_model.py
-├── reserva_route.py
-├── instance/
-│   └── reservas.db
-└── README.md
-🛠️ Futuras Melhorias
-Validação de conflito de horário
-
-Integração via RabbitMQ ou outra fila
-
-Autenticação e autorização de usuários
-
-Logs e monitoramento com ferramentas externas
+A integração entre os microserviços ocorre por meio de troca de dados através das APIs RESTful, permitindo uma arquitetura desacoplada e escalável.
 
 
-
-
-- Explicação arquitetural detalhada
-
-- Visão do ecossistema de microsserviços
